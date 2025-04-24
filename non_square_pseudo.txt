@@ -1,0 +1,25 @@
+INPUT : A(M x N), B(N x Q)
+INPUT : Q = {Q0, ... Qr, ... Qp-1}
+OUTPUT : C = (MxQ)
+
+FOR EACH PROCESSOR Qr DO IN PARALLEL
+    Ar (M/P x N) <--- A(r * (M/P):(r-1) * (M/P), :)
+    Br (N x Q/P) <--- B(:, r * (Q/P):(r-1) * (Q/P))
+    Cr (M/P x Q/P) <--- 0
+
+    FOR t = 0 to P-1 DO
+        IF t != 0 THEN
+            SPROC = (r + t)mod P
+            RPROC = (r - t + P)mod P
+            SEND Br to PROCESSOR Q SPROC
+            RECIEVE BRPROC FROM PROCESSOR Q RPROC
+        END IF
+        FOR i = 0 to M/P -1
+           FOR j = 0 to Q/P - 1
+              FOR k = 0 to n - 1
+                 Cr(i,j) += Ar(i,k) * BPROC(k,j)
+              END FOR
+           END FOR
+        END FOR
+    END FOR
+END FOR
